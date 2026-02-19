@@ -5,7 +5,7 @@ import {
   BookOpen, 
   Briefcase, 
   Users, 
-  Settings, 
+  Settings as SettingsIcon, 
   LogOut, 
   Menu, 
   X, 
@@ -57,7 +57,7 @@ function Sidebar({ isOpen, setIsOpen, activeTab, setActiveTab }: SidebarProps) {
     { id: 'rituals', icon: BookOpen, label: 'Rituais de Fé' },
     { id: 'business', icon: Briefcase, label: 'Gestão de Negócios' },
     { id: 'community', icon: Users, label: 'Comunidade' },
-    { id: 'settings', icon: Settings, label: 'Configurações' },
+    { id: 'settings', icon: SettingsIcon, label: 'Configurações' },
   ];
 
   return (
@@ -869,7 +869,7 @@ function Community() {
 }
 
 // 11. Settings
-function Settings() {
+function SettingsTab() {
   return (
     <div className="max-w-3xl mx-auto space-y-8">
       <div>
@@ -1004,7 +1004,7 @@ export default function DashboardPage() {
       case 'community':
         return <Community />;
       case 'settings':
-        return <Settings />;
+        return <SettingsTab />;
       default:
         return null;
     }
