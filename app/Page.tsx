@@ -31,7 +31,7 @@ import {
   Book 
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
