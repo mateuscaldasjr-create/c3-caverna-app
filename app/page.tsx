@@ -37,15 +37,48 @@ export default function C3CavernaOS() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // 2. Função de Login/Cadastro
+  // 2. Função de Login/Cadastro Blindada
   const handleAuth = async (type: 'login' | 'signup') => {
+    // Validação inicial para evitar erro de campos vazios (Anonymous error)
+    if (!email || !password) {
+      alert("Por favor, preencha o e-mail e a senha.");
+      return;
+    }
+
+    if (password.length < 6) {
+      alert("A senha deve ter no mínimo 6 caracteres.");
+      return;
+    }
+
     setLoading(true);
-    const { error } = type === 'login' 
-      ? await supabase.auth.signInWithPassword({ email, password })
-      : await supabase.auth.signUp({ email, password });
-    
-    if (error) alert(error.message);
-    setLoading(false);
+
+    try {
+      const { data, error } = type === 'login' 
+        ? await supabase.auth.signInWithPassword({ email, password })
+        : await supabase.auth.signUp({ 
+            email, 
+            password,
+            options: {
+              emailRedirectTo: window.location.origin
+            }
+          });
+      
+      if (error) {
+        // Tradução amigável para erros comuns
+        if (error.message.includes("Anonymous sign-ins")) {
+          alert("Aviso: Ative o provedor de e-mail no painel do Supabase (Auth > Providers).");
+        } else {
+          alert(error.message);
+        }
+      } else if (type === 'signup' && data.user) {
+        alert("Acesso de aluno criado com sucesso! Agora você pode entrar.");
+      }
+    } catch (err) {
+      alert("Ocorreu um erro inesperado na conexão.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (loading) return (
@@ -79,6 +112,7 @@ export default function C3CavernaOS() {
                 type="email" 
                 placeholder="Seu e-mail" 
                 className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-12 pr-4 text-white outline-none focus:border-[#D4AF37]/50 transition-all"
+                value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
@@ -88,6 +122,7 @@ export default function C3CavernaOS() {
                 type="password" 
                 placeholder="Sua senha" 
                 className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-12 pr-4 text-white outline-none focus:border-[#D4AF37]/50 transition-all"
+                value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
@@ -147,13 +182,11 @@ export default function C3CavernaOS() {
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Dashboard Cards Simbolizando o Funcionamento */}
           <div className="p-8 bg-white/5 rounded-3xl border border-white/10">
             <h3 className="text-[#D4AF37] font-bold mb-6 flex items-center gap-2"><Flame size={18} /> MODO CAVERNA</h3>
             <div className="text-5xl font-mono text-center mb-8">25:00</div>
             <button className="w-full bg-[#D4AF37] text-[#0A0F1D] py-4 rounded-xl font-bold">INICIAR FOCO</button>
           </div>
-          {/* ... Outros cards aqui ... */}
         </div>
       </main>
     </div>
