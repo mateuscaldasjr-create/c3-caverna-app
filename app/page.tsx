@@ -2,24 +2,34 @@
 
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Flame, LogOut, User, Lock, Mail, ArrowRight } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { 
+  LayoutDashboard, Flame, BookOpen, Briefcase, Users, 
+  Settings as SettingsIcon, LogOut, Menu, X, Bell, 
+  Play, Pause, RefreshCw, CheckCircle2, Circle, Check, 
+  DollarSign, TrendingUp, Trophy, User, Key, Volume2, Book, 
+  Lock, Mail, ArrowRight, ChevronRight
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { BarChart, Bar, XAxis, ResponsiveContainer, Cell, Tooltip } from 'recharts';
 
-// --- CONFIGURAÇÃO BLINDADA ---
+// --- CONFIGURAÇÃO PROTEGIDA ---
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-// Criamos o cliente apenas se as chaves existirem, evitando o erro de build da Vercel
+// Inicialização segura para não travar o Build da Vercel
 const supabase = (supabaseUrl && supabaseAnonKey) 
   ? createClient(supabaseUrl, supabaseAnonKey) 
   : null;
 
-export default function C3CavernaOS() {
+export default function C3FullDashboard() {
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  // Monitor de Sessão
   useEffect(() => {
     if (!supabase) {
       setLoading(false);
@@ -38,14 +48,14 @@ export default function C3CavernaOS() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Lógica de Autenticação
   const handleAuth = async (type: 'login' | 'signup') => {
     if (!supabase) {
-      alert("❌ Erro: As chaves do Supabase não foram configuradas na Vercel!");
+      alert("Configuração do Supabase ausente na Vercel.");
       return;
     }
-
     if (!email || !password) {
-      alert("⚠️ Digite o e-mail e a senha primeiro!");
+      alert("Preencha todos os campos.");
       return;
     }
 
@@ -55,8 +65,8 @@ export default function C3CavernaOS() {
         ? await supabase.auth.signInWithPassword({ email, password })
         : await supabase.auth.signUp({ email, password });
       
-      if (error) alert(`❌ ${error.message}`);
-      else if (type === 'signup' && data.user) alert("✅ Acesso criado! Agora clique em ENTRAR.");
+      if (error) alert(`Erro: ${error.message}`);
+      else if (type === 'signup' && data.user) alert("Conta criada! Tente entrar agora.");
     } catch (err) {
       alert("Erro de conexão.");
     } finally {
@@ -70,31 +80,35 @@ export default function C3CavernaOS() {
     </div>
   );
 
+  // --- VIEW: LOGIN ---
   if (!session) {
     return (
-      <div className="min-h-screen bg-[#0A0F1D] flex items-center justify-center p-6 relative">
-        <div className="absolute top-0 left-0 w-full h-full bg-[#D4AF37]/5 blur-[120px] pointer-events-none" />
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md bg-white/5 p-10 rounded-3xl border border-white/10 text-center z-10">
-          <div className="w-16 h-16 bg-[#D4AF37] rounded-2xl mx-auto flex items-center justify-center text-[#0A0F1D] font-bold text-3xl mb-6 shadow-lg shadow-[#D4AF37]/20">C3</div>
-          <h1 className="text-2xl font-serif font-bold text-white mb-2">Business Academy</h1>
-          <p className="text-white/40 text-[10px] mb-8 uppercase tracking-widest">Portal da Mordomia</p>
-
-          <div className="space-y-4">
-            <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 w-5 h-5" />
-              <input type="email" placeholder="Seu e-mail" className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-12 text-white outline-none" 
-                onChange={(e) => setEmail(e.target.value)} />
+      <div className="min-h-screen bg-[#0A0F1D] flex items-center justify-center p-6 relative overflow-hidden">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#D4AF37]/5 rounded-full blur-[120px]" />
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-md bg-white/5 p-10 rounded-[2rem] border border-white/10 backdrop-blur-xl z-10 text-center">
+          <div className="w-20 h-20 bg-[#D4AF37] rounded-3xl mx-auto flex items-center justify-center text-[#0A0F1D] font-bold text-4xl mb-8 shadow-2xl shadow-[#D4AF37]/20">C3</div>
+          <h1 className="text-3xl font-serif font-bold text-white mb-2">C3 Academy</h1>
+          <p className="text-white/30 text-xs mb-10 tracking-[0.2em] uppercase font-light">The Steward's Path</p>
+          <div className="space-y-4 text-left">
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-widest text-white/40 ml-1">E-mail de Acesso</label>
+              <div className="relative group">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#D4AF37] transition-colors" size={18} />
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-black/40 border border-white/5 rounded-2xl py-4 pl-12 text-white outline-none focus:border-[#D4AF37]/30 transition-all" placeholder="nome@exemplo.com" />
+              </div>
             </div>
-            <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 w-5 h-5" />
-              <input type="password" placeholder="Sua senha" className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-12 text-white outline-none"
-                onChange={(e) => setPassword(e.target.value)} />
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase tracking-widest text-white/40 ml-1">Senha de Segurança</label>
+              <div className="relative group">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#D4AF37] transition-colors" size={18} />
+                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-black/40 border border-white/5 rounded-2xl py-4 pl-12 text-white outline-none focus:border-[#D4AF37]/30 transition-all" placeholder="••••••••" />
+              </div>
             </div>
-            <button onClick={() => handleAuth('login')} className="w-full bg-[#D4AF37] text-[#0A0F1D] font-bold py-4 rounded-xl flex items-center justify-center gap-2">
-              ENTRAR NA CAVERNA <ArrowRight size={18} />
+            <button onClick={() => handleAuth('login')} className="w-full bg-[#D4AF37] text-[#0A0F1D] font-black py-5 rounded-2xl mt-4 hover:brightness-110 active:scale-[0.98] transition-all shadow-lg shadow-[#D4AF37]/10 flex items-center justify-center gap-3 text-sm">
+              ENTRAR NA CAVERNA <ChevronRight size={18} />
             </button>
-            <button onClick={() => handleAuth('signup')} className="w-full text-white/40 text-xs py-2">
-              Não tem conta? Criar acesso de aluno
+            <button onClick={() => handleAuth('signup')} className="w-full text-white/30 text-[10px] hover:text-[#D4AF37] uppercase tracking-widest pt-4 transition-colors">
+              Solicitar Acesso de Aluno
             </button>
           </div>
         </motion.div>
@@ -102,13 +116,6 @@ export default function C3CavernaOS() {
     );
   }
 
+  // --- VIEW: DASHBOARD ---
   return (
-    <div className="min-h-screen bg-[#0A0F1D] text-white p-10 flex flex-col items-center justify-center">
-      <h1 className="text-3xl font-serif mb-4 text-[#D4AF37]">Bem-vindo à Caverna!</h1>
-      <p className="mb-8 opacity-50">{session.user.email}</p>
-      <button onClick={() => supabase?.auth.signOut()} className="flex items-center gap-2 text-red-400/60">
-        <LogOut size={20} /> Sair
-      </button>
-    </div>
-  );
-}
+    <div className="min-h-screen bg-[#0A0F1D] text
